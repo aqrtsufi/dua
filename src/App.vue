@@ -1,5 +1,6 @@
 <template>
       <div class="app bg-base-100 text-base-content">
+      <h1>Test dua app</h1>
         <router-view></router-view>
   </div>
 </template>
