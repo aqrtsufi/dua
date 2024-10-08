@@ -1,18 +1,24 @@
 const GITHUB_RAW_CONTENT_URL = 'https://raw.githubusercontent.com/yashineonline/duaRepository/main/dua.txt';
 
+const CACHE_KEY = 'duaContent';
+
 export async function fetchDuaContent(): Promise<string> {
   try {
-    console.log('Fetching dua content from:', GITHUB_RAW_CONTENT_URL);
     const response = await fetch(GITHUB_RAW_CONTENT_URL);
-    console.log('Response status:', response.status);
     if (!response.ok) {
       throw new Error(`Failed to fetch dua content: ${response.status} ${response.statusText}`);
     }
     const text = await response.text();
-    console.log('Fetched content:', text.substring(0, 100) + '...'); // Log first 100 characters
+    localStorage.setItem(CACHE_KEY, text);
+
     return text;
   } catch (error) {
     console.error('Error fetching dua content:', error);
+    const cachedContent = localStorage.getItem(CACHE_KEY);
+    if (cachedContent) {
+      console.log('Using cached content');
+      return cachedContent;
+    }
     throw error;
   }
 }
@@ -26,6 +32,8 @@ export function parseDuaContent(content: string): {
   recommendation: string;
   prayers: Prayer[];
   ending: string;
+  salawat: string;
+  fatiha: string;
 } {
   const lines = content.split('\n');
   let result = {
@@ -34,11 +42,12 @@ export function parseDuaContent(content: string): {
     link: '',
     recommendation: '',
     prayers: [] as Prayer[],
-    ending: ''
+    ending: '',
+    salawat: '',
+    fatiha: ''
   };
 
   let currentSection = '';
-  let currentPrayer: Partial<Prayer> = {};
   let arabicLines: string[] = [];
   let meaningLines: string[] = [];
   let isCollectingArabic = false;
@@ -47,12 +56,11 @@ export function parseDuaContent(content: string): {
   for (const line of lines) {
     if (line.startsWith('POSITIVITY PRAYERS')) {
       currentSection = 'introduction';
-    } else if (line.startsWith('Procedure of reciting')) {
+    } else if (line.startsWith('P:')) {
       currentSection = 'procedure';
-    } else if (line.startsWith('bit.ly/')) {
-      result.link = line.trim();
-    } else if (line.startsWith('Repeat each set')) {
+    } else if (line.startsWith('I:')) {
       currentSection = 'recommendation';
+      result.recommendation += line.substring(2).trim() + '\n';
     } else if (line.startsWith('A:')) {
       isCollectingArabic = true;
       isCollectingMeaning = false;
@@ -61,10 +69,19 @@ export function parseDuaContent(content: string): {
       isCollectingArabic = false;
       isCollectingMeaning = true;
       meaningLines = [];
-    } else if (line.startsWith('At the end, recite:')) {
+    } else if (line.startsWith('SF:')) {
       currentSection = 'ending';
-      isCollectingArabic = false;
-      isCollectingMeaning = false;
+      result.ending += line.substring(3).trim() + '\n';
+    } else if (line.startsWith('S:')) {
+      currentSection = 'salawat';
+    } else if (line.startsWith('F:')) {
+      currentSection = 'fatiha';
+    } else if (line.startsWith('L:')) {
+      result.link = line.substring(2).trim();
+    } else if (line.startsWith('PP:')) {
+      currentSection = 'protectionPrayers';
+    } else if (line.startsWith('TP:')) {
+      currentSection = 'travelingPrayers';
     } else if (isCollectingArabic && line.trim() !== '') {
       arabicLines.push(line.trim());
     } else if (isCollectingMeaning && line.trim() !== '') {
@@ -82,6 +99,12 @@ export function parseDuaContent(content: string): {
           break;
         case 'ending':
           result.ending += line + '\n';
+          break;
+        case 'salawat':
+          result.salawat += line + '\n';
+          break;
+        case 'fatiha':
+          result.fatiha += line + '\n';
           break;
       }
     }

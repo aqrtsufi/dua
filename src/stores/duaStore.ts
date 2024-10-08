@@ -12,6 +12,8 @@ export const useDuaStore = defineStore('dua', () => {
   const recommendation = ref('')
   const prayers = ref<Prayer[]>([])
   const ending = ref('')
+  const salawat = ref('')
+  const fatiha = ref('')
 
   async function fetchDua() {
     console.log('fetchDua called')
@@ -30,6 +32,8 @@ export const useDuaStore = defineStore('dua', () => {
       recommendation.value = parsedContent.recommendation
       prayers.value = parsedContent.prayers
       ending.value = parsedContent.ending
+      salawat.value = parsedContent.salawat
+      fatiha.value = parsedContent.fatiha
       console.log('Store updated with parsed content')
     } catch (err) {
       error.value = 'Failed to load dua content'
@@ -50,6 +54,8 @@ export const useDuaStore = defineStore('dua', () => {
     recommendation,
     prayers,
     ending,
+    salawat,
+    fatiha,
     fetchDua
   }
 })
