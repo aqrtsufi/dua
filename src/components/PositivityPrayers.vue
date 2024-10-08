@@ -83,13 +83,17 @@
     name: 'PositivityPrayers',
     setup() {
       console.log('PositivityPrayers setup called')
-  const duaStore = useDuaStore()
-  console.log('duaStore initialized:', duaStore)
-  const { isLoading, error, introduction, procedure, link, recommendation, prayers, ending } = storeToRefs(duaStore)
+      const duaStore = useDuaStore()
+      console.log('duaStore initialized:', duaStore)
+      const { isLoading, error, introduction, procedure, link, recommendation, prayers, ending } = storeToRefs(duaStore)
 
-  onMounted(() => {
-    console.log('PositivityPrayers mounted, calling fetchDua')
-    duaStore.fetchDua()
+      onMounted(async () => {
+        console.log('PositivityPrayers mounted, calling fetchDua')
+        try {
+          await duaStore.fetchDua()
+        } catch (err) {
+          console.error('Error fetching dua:', err)
+        }
       })
 
       return {

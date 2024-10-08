@@ -13,7 +13,7 @@ export default defineConfig({
       }
     }
   },
-  base: './',
+  base: '/dua/',
   build: {
     outDir: 'docs', // Change this from 'dist' to 'docs'
   },

@@ -34,6 +34,7 @@ export const useDuaStore = defineStore('dua', () => {
     } catch (err) {
       error.value = 'Failed to load dua content'
       console.error('Failed to load dua content:', err)
+      throw err // Re-throw the error to be caught in the component
     } finally {
       isLoading.value = false
       console.log('fetchDua completed, isLoading:', isLoading.value)
