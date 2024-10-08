@@ -14,12 +14,13 @@ export const useDuaStore = defineStore('dua', () => {
   const ending = ref('')
 
   async function fetchDua() {
+    console.log('fetchDua called')
     isLoading.value = true
     error.value = null
     try {
       console.log('Fetching dua content...')
       const content = await fetchDuaContent()
-      console.log('Fetched content:', content)
+      console.log('Fetched content:', content.substring(0, 100) + '...') // Log first 100 characters
       const parsedContent = parseDuaContent(content)
       console.log('Parsed content:', parsedContent)
       
@@ -29,11 +30,13 @@ export const useDuaStore = defineStore('dua', () => {
       recommendation.value = parsedContent.recommendation
       prayers.value = parsedContent.prayers
       ending.value = parsedContent.ending
+      console.log('Store updated with parsed content')
     } catch (err) {
       error.value = 'Failed to load dua content'
       console.error('Failed to load dua content:', err)
     } finally {
       isLoading.value = false
+      console.log('fetchDua completed, isLoading:', isLoading.value)
     }
   }
 

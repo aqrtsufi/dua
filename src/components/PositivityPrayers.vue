@@ -82,11 +82,14 @@
   export default defineComponent({
     name: 'PositivityPrayers',
     setup() {
-      const duaStore = useDuaStore()
-      const { isLoading, error, introduction, procedure, link, recommendation, prayers, ending } = storeToRefs(duaStore)
+      console.log('PositivityPrayers setup called')
+  const duaStore = useDuaStore()
+  console.log('duaStore initialized:', duaStore)
+  const { isLoading, error, introduction, procedure, link, recommendation, prayers, ending } = storeToRefs(duaStore)
 
-      onMounted(() => {
-        duaStore.fetchDua()
+  onMounted(() => {
+    console.log('PositivityPrayers mounted, calling fetchDua')
+    duaStore.fetchDua()
       })
 
       return {

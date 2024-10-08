@@ -1,4 +1,4 @@
-const GITHUB_RAW_CONTENT_URL = 'https://raw.githubusercontent.com/yashineonline/duaRepository/main/dua.txt';
+const GITHUB_RAW_CONTENT_URL = '/api/yashineonline/duaRepository/main/dua.txt';
 
 export async function fetchDuaContent(): Promise<string> {
   try {
