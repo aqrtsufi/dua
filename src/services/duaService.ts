@@ -39,6 +39,10 @@ export function parseDuaContent(content: string): {
 
   let currentSection = '';
   let currentPrayer: Partial<Prayer> = {};
+  let arabicLines: string[] = [];
+  let meaningLines: string[] = [];
+  let isCollectingArabic = false;
+  let isCollectingMeaning = false;
 
   for (const line of lines) {
     if (line.startsWith('POSITIVITY PRAYERS')) {
@@ -50,16 +54,21 @@ export function parseDuaContent(content: string): {
     } else if (line.startsWith('Repeat each set')) {
       currentSection = 'recommendation';
     } else if (line.startsWith('A:')) {
-      if (currentPrayer.title) {
-        result.prayers.push(currentPrayer as Prayer);
-      }
-      currentPrayer = { title: line.substring(2).trim() };
-    } else if (line.startsWith('E:') && currentPrayer.title) {
-      currentPrayer.meaning = line.substring(2).trim();
-      result.prayers.push(currentPrayer as Prayer);
-      currentPrayer = {};
+      isCollectingArabic = true;
+      isCollectingMeaning = false;
+      arabicLines = [];
+    } else if (line.startsWith('E:')) {
+      isCollectingArabic = false;
+      isCollectingMeaning = true;
+      meaningLines = [];
     } else if (line.startsWith('At the end, recite:')) {
       currentSection = 'ending';
+      isCollectingArabic = false;
+      isCollectingMeaning = false;
+    } else if (isCollectingArabic && line.trim() !== '') {
+      arabicLines.push(line.trim());
+    } else if (isCollectingMeaning && line.trim() !== '') {
+      meaningLines.push(line.trim());
     } else {
       switch (currentSection) {
         case 'introduction':
@@ -76,6 +85,14 @@ export function parseDuaContent(content: string): {
           break;
       }
     }
+  }
+
+  // Process collected Arabic and Meaning lines
+  for (let i = 1; i < arabicLines.length; i++) {
+    result.prayers.push({
+      arabic: arabicLines[i],
+      meaning: meaningLines[i] || ''
+    });
   }
 
   return result;

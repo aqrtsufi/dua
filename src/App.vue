@@ -1,7 +1,7 @@
 <template>
       <div class="app bg-base-100 text-base-content">
-      <h1>Test2 dua app</h1>
-      <p>Before router-view</p>
+      <h1>Dua Book App by Ansari Publications</h1>
+      <p>In construction</p>
         <router-view></router-view>
         <p>After router-view</p>
   </div>

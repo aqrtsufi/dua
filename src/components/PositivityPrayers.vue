@@ -2,6 +2,16 @@
     <div class="positivity-prayers container mx-auto px-4 py-8">
       <h1 class="text-4xl font-bold mb-6 text-primary">POSITIVITY PRAYERS</h1>
       
+      <div class="mb-4">
+        <label for="font-size" class="mr-2">Font Size:</label>
+        <select id="font-size" v-model="fontSize" class="select select-bordered w-full max-w-xs">
+          <option value="text-sm">Small</option>
+          <option value="text-base">Medium</option>
+          <option value="text-lg">Large</option>
+          <option value="text-xl">Extra Large</option>
+        </select>
+      </div>
+
       <div v-if="isLoading" class="loading loading-lg loading-spinner text-primary"></div>
       
       <div v-else-if="error" class="alert alert-error shadow-lg">
@@ -12,7 +22,7 @@
       </div>
       
       <template v-else>
-        <div class="space-y-6">
+        <div class="space-y-6" :class="fontSize">
           <div class="card bg-base-200 shadow-xl">
             <div class="card-body">
               <h2 class="card-title">Introduction</h2>
@@ -39,23 +49,22 @@
           </div>
           
           <div class="prayers">
-            <h2 class="text-2xl font-semibold mb-4">Prayers</h2>
+            <h2 class="text-2xl font-semibold mb-4">Zikr</h2>
             <div v-for="(prayer, index) in prayers" :key="index" class="mb-4">
               <div class="collapse collapse-arrow bg-base-200">
-                <input type="radio" name="my-accordion-2" :checked="index === 0" /> 
-                <div class="collapse-title text-xl font-medium">
-                  {{ prayer.title }}
+                <input type="radio" name="my-accordion-2" :checked="index === 0" @keydown.enter="toggleAccordion(index)" @keydown.space="toggleAccordion(index)" /> 
+                <div class="collapse-title text-xl font-medium" tabindex="0" @keydown.enter="toggleAccordion(index)" @keydown.space="toggleAccordion(index)">
+                  {{ prayer.arabic }}
                 </div>
                 <div class="collapse-content">
-                  <div class="lg:flex lg:space-x-4">
-                    <div class="arabic lg:w-1/2 mb-2 lg:mb-0">
-                      <h3 class="font-bold">Arabic</h3>
-                      <p>{{ prayer.arabic }}</p>
-                    </div>
-                    <div class="meaning lg:w-1/2">
-                      <h3 class="font-bold">Meaning</h3>
-                      <p>{{ prayer.meaning }}</p>
-                    </div>
+                  <div class="meaning mt-2">
+                    <h3 class="font-bold">Meaning</h3>
+                    <p>{{ prayer.meaning }}</p>
+                  </div>
+                  <div class="mt-4">
+                    <button @click="incrementCounter(index)" class="btn btn-primary" :aria-label="`Recite ${prayer.arabic}`">
+                      Recite ({{ prayerCounters[index] || 0 }})
+                    </button>
                   </div>
                 </div>
               </div>
@@ -75,7 +84,7 @@
   </template>
   
   <script lang="ts">
-  import { defineComponent, onMounted } from 'vue'
+  import { defineComponent, onMounted, ref } from 'vue'
   import { storeToRefs } from 'pinia'
   import { useDuaStore } from '../stores/duaStore'
 
@@ -86,6 +95,21 @@
       const duaStore = useDuaStore()
       console.log('duaStore initialized:', duaStore)
       const { isLoading, error, introduction, procedure, link, recommendation, prayers, ending } = storeToRefs(duaStore)
+
+      const prayerCounters = ref<number[]>([])
+      const fontSize = ref('text-base')
+
+      const incrementCounter = (index: number) => {
+        if (!prayerCounters.value[index]) {
+          prayerCounters.value[index] = 0
+        }
+        prayerCounters.value[index]++
+      }
+
+      const toggleAccordion = (index: number) => {
+        const accordions = document.getElementsByName('my-accordion-2') as NodeListOf<HTMLInputElement>
+        accordions[index].checked = !accordions[index].checked
+      }
 
       onMounted(async () => {
         console.log('PositivityPrayers mounted, calling fetchDua')
@@ -104,7 +128,11 @@
         link,
         recommendation,
         prayers,
-        ending
+        ending,
+        prayerCounters,
+        incrementCounter,
+        fontSize,
+        toggleAccordion
       }
     }
   })
